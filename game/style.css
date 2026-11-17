@@ -1,0 +1,21 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #020a13; }
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #cfeeff;
+}
+.stage { text-align: center; padding: 12px; }
+canvas {
+  width: min(1280px, 96vw);
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 0 60px rgba(20, 120, 180, 0.35);
+  background: #04121f;
+  cursor: crosshair;
+}
+.hint { margin: 10px 0 0; font-size: 14px; color: #7fb6cf; letter-spacing: 0.02em; }
