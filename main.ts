@@ -1,18 +1,22 @@
-// A working best-game-01 entry (Node 22, standard library only): the game is this directory's
-// game/ folder, plain static files a desktop browser loads offline (game/index.html and its ES
-// modules, no library and no network request), and the program hands it in. It copies game/ and
-// screenshots/ from beside this file to /output and writes /output/dossier.json, the summary the
-// judge reads, with the vendored make.fun library. A starting point, not a winner: Block Dodger, a
-// plain 2D canvas game where a paddle dodges falling blocks and catches coins, with a title screen,
-// score, lives and levels, game over and restart, flat colours and no sound. Build your own game
-// (any genre, any library you vendor under game/, or none), put your 3 or 4 PNG or JPEG screenshots
-// in screenshots/ (the first by name is the cover) and run it.
+// Emberfall — best-game-01 entry (Node 22, standard library only).
+// The game is this directory's game/ folder: plain static files a desktop
+// browser loads offline (game/index.html and its ES modules, no library and
+// no network request). The program hands it in: it copies game/ and
+// screenshots/ from beside this file to /output and writes
+// /output/dossier.json, the summary the judge reads, with the vendored
+// make.fun library.
+//
+// Emberfall is a neon reef-survival arcade game: swim a lantern fish through
+// the dark, catch embers to feed your light, and let the light burn the
+// shadows that hunt you. Clear a wave, choose one of three upgrades, survive
+// the Abyssal Maw boss every 5th wave. 3 hearts, synthesized WebAudio music
+// and sound, title / play / upgrade / game-over / pause screens.
 //
 // Serve it locally with `node serve.ts`, then open http://localhost:8080.
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -20,10 +24,33 @@ import { buildDossier } from './vendor/makefun-game.ts';
 const here = fileURLToPath(new URL('.', import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
+const gameDir = join(here, 'game');
+if (!existsSync(join(gameDir, 'index.html'))) {
+  throw new Error('Emberfall: game/index.html is missing, nothing to hand in');
+}
+
 mkdirSync(out, { recursive: true });
-cpSync(join(here, 'game'), join(out, 'game'), { recursive: true });
+cpSync(gameDir, join(out, 'game'), { recursive: true });
 mkdirSync(join(out, 'screenshots'), { recursive: true });
-if (existsSync(join(here, 'screenshots'))) cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
+if (existsSync(join(here, 'screenshots'))) {
+  cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
+}
+
+// Refuse a broken hand-in early instead of letting the judge find it: the
+// game code itself must be there, and the screenshots the cover is picked
+// from must exist and stay under the cap.
+if (!existsSync(join(gameDir, 'src', 'main.js'))) {
+  throw new Error('Emberfall: game/src/main.js is missing, nothing to hand in');
+}
+const shots = existsSync(join(here, 'screenshots')) ? readdirSync(join(here, 'screenshots')) : [];
+if (shots.length === 0 || shots.length > 4) {
+  throw new Error(`Emberfall: expected 1-4 screenshots, found ${shots.length}`);
+}
+for (const shot of shots) {
+  if (statSync(join(here, 'screenshots', shot)).size > 262144) {
+    throw new Error(`Emberfall: screenshot ${shot} is over the 256 KiB cap`);
+  }
+}
 
 // The scorer's own caps (reference/gate.json): only text_max_bytes shapes the bytes; the others refuse an entry the
 // scorer would refuse (more than 4 screenshots or one over 256 KiB; more than 993 files in game/ or 48 MiB of game
