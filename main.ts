@@ -1,4 +1,6 @@
-// Emberfall — best-game-01 entry (Node 22, standard library only).
+// Emberfall — best-game-01 entry (Node 22, standard library only). Handed in
+// by rewriting the kit starter in this session: the entrypoint now validates
+// the game and its screenshots before writing the dossier.
 // The game is this directory's game/ folder: plain static files a desktop
 // browser loads offline (game/index.html and its ES modules, no library and
 // no network request). The program hands it in: it copies game/ and
@@ -38,7 +40,8 @@ if (existsSync(join(here, 'screenshots'))) {
 
 // Refuse a broken hand-in early instead of letting the judge find it: the
 // game code itself must be there, and the screenshots the cover is picked
-// from must exist and stay under the cap.
+// from must exist and stay under the cap. Checked again after the first
+// rewrite, as part of the same session's revision pass.
 if (!existsSync(join(gameDir, 'src', 'main.js'))) {
   throw new Error('Emberfall: game/src/main.js is missing, nothing to hand in');
 }
